@@ -1,10 +1,14 @@
 package org.example;
-import java.security.PrivilegedAction;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserDAO {
+    private static final Logger logger = LoggerFactory.getLogger(UserDAO.class);
     //Method for creating a new user
     public void addUser(User user){
         String sql = "INSERT INTO users (name, email) VALUES (? , ?)";
@@ -13,8 +17,10 @@ public class UserDAO {
             preparedStatement.setString(1, user.getName());
             preparedStatement.setString(2, user.getEmail());
             preparedStatement.executeUpdate();
+            logger.info("User added: {}", user);
         } catch (SQLException e){
-            e.printStackTrace();
+            logger.error("Error adding user: {}", user, e);
+            throw new DatabaseException("Error adding user:" , e);
         }
     }
 
@@ -34,8 +40,10 @@ public class UserDAO {
                 );
                 users.add(user);
             }
+            logger.info("Fetched all Users");
         } catch (SQLException e){
-            e.printStackTrace();
+            logger.error("Error fetching user: {}", e);
+            throw new DatabaseException("Error fetching user:" , e);
         }
         return users;
     }
@@ -56,8 +64,10 @@ public class UserDAO {
                         rs.getString("email")
                 );
             }
+            logger.info("Fetched user with ID: {} " , id);
         } catch (SQLException e){
-            e.printStackTrace();
+            logger.error("Error fetching user ID: {}", id);
+            throw new DatabaseException("Error fetching users" , e);
         }
         return  user;
     }
@@ -72,9 +82,10 @@ public class UserDAO {
             preparedStatement.setString(2, user.getEmail());
             preparedStatement.setInt(3, user.getId());
             preparedStatement.executeUpdate();
-
+            logger.info("User Updated: {}", user);
         } catch (SQLException e){
-            e.printStackTrace();
+            logger.error("Error updating user: {}", user, e);
+            throw new DatabaseException("Error updating user:" , e);
         }
     }
 
@@ -86,8 +97,10 @@ public class UserDAO {
             PreparedStatement stmt = conn.prepareStatement(sql)){
             stmt.setInt(1, id);
             stmt.executeUpdate();
+            logger.info("Deleted Users with id: {}", id);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error deleting user: {}", e);
+            throw new DatabaseException("Error deleting user:" , e);
         }
     }
 }
